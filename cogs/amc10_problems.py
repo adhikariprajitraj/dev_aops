@@ -44,8 +44,6 @@ aime_id = ["1", "2"]
 reactions = {"🇦": "a", "🇧": "b", "🇨": "c", "🇩": "d", "🇪": "e", "❎": "quit"}
 
 
-# AMC10 help
-
 from discord import app_commands
 
 
@@ -132,8 +130,6 @@ class Choice(discord.ui.View):
         self.clicked = True
         await self.disable_if_clicked()
         self.stop()
-
-
 
 
 class AMC10(commands.Cog):

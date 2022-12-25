@@ -147,7 +147,7 @@ class General(commands.Cog, name="general"):
     async def server(self, context: Context) -> None:
 
         embed = discord.Embed(
-            description=f"Join the support server for the bot by clicking [here](https://discord.gg/mTBrXyWxAF).",
+            description=f"Join the support server for the bot by clicking [here](https://discord.gg/NgdMzePhkA).",
             color=0xD75BF4
         )
         try:
