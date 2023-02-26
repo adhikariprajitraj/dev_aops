@@ -346,7 +346,7 @@ class ContestProblems(commands.Cog):
         )
 
         right_response_embed = discord.Embed(description = (
-                    f"Correct Answer. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{random_contest}_Problems/Problem_{random_problem})"))
+                    f"Correct Answer `{sol.upper()}`. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{random_contest}_Problems/Problem_{random_problem})"))
 
         wrong_response_embed = discord.Embed(description = (
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_contest}_AMC_{amc_id}_Problems/Problem_{random_problem})."))
