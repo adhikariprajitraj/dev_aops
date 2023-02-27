@@ -268,7 +268,7 @@ class ContestProblems(commands.Cog):
             )
 
             right_response_embed = discord.Embed(description = (
-                    f"Correct Answer. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})"
+                    f"Correct Answer `{sol.upper()}`. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})"
                     ))
             wrong_response_embed = discord.Embed(description = (
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})."
@@ -304,7 +304,7 @@ class ContestProblems(commands.Cog):
             )
 
             right_response_embed = discord.Embed(description = (
-                    f"Correct Answer. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})"
+                    f"Correct Answer `{sol.upper()}`. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})"
                     ))
             wrong_response_embed = discord.Embed(description = (
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})."

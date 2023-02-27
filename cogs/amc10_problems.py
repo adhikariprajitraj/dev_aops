@@ -169,7 +169,7 @@ class AMC10(commands.Cog):
                 ).strip()
             )
             right_response_embed = discord.Embed(description = (
-                    f"Correct Answer. Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_easy})"
+                    f"Correct Answer `{sol.upper()}`. Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_easy})"
                     ))
             wrong_response_embed = discord.Embed(description = (
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_easy})"
@@ -207,7 +207,7 @@ class AMC10(commands.Cog):
             )
             
             right_response_embed = discord.Embed(description = (
-                    f"Correct Answer. Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_medium})"
+                    f"Correct Answer `{sol.upper()}`. Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_medium})"
                     ))
             wrong_response_embed = discord.Embed(description = (
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_medium})"
