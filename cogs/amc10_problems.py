@@ -49,88 +49,107 @@ from discord import app_commands
 
 class Choice(discord.ui.View):
     value = None
-    clicked:bool = False
-    timeout=1000
-    
-    def __init__(self,sol, randomyear, amc10_contestid, amc_medium, right_response_embed, wrong_response_embed):
+    clicked: bool = False
+    timeout = 10000
+
+    def __init__(self, sol, randomyear, amc10_contestid, amc_medium, right_response_embed, wrong_response_embed,
+                 author):
         self.sol = sol
         self.randomyear = randomyear
         self.amc10_contestid = amc10_contestid
         self.amc_medium = amc_medium
-        self.right_response_embed=  right_response_embed
-        self.wrong_response_embed=  wrong_response_embed
+        self.right_response_embed = right_response_embed
+        self.wrong_response_embed = wrong_response_embed
+        self.author = author
         super().__init__()
 
     async def disable_all_items(self):
         for item in self.children:
+            
             item.disabled = True
-        
+
     async def disable_if_clicked(self):
         if self.clicked:
             await self.disable_all_items()
-        await self.message.edit(view=self)
         
+        await self.message.edit(view=self)
+
     async def on_timeout(self) -> None:
         # await self.message.channel.send("Timed out due to inactivity. You may want to donate some money to cover server costs.")
         await self.disable_all_items()
-    
+
+    async def boiler_plate(self, interaction: discord.Interaction):
+        if interaction.user.id == self.author.id:
+            if self.value == str(self.sol):
+                await interaction.response.send_message(embed=self.right_response_embed)
+            else:
+                await interaction.response.send_message(embed=self.wrong_response_embed)
+            self.clicked = True
+            await self.disable_all_items()
+        else:
+            await interaction.response.send_message(f"You are not the author of this message {interaction.user.mention}")
+            self.clicked = False
+        self.clicked = True
+        await self.disable_if_clicked()
+        self.stop()
 
     @discord.ui.button(label="A", style=discord.ButtonStyle.blurple)
     async def choiceA(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "a"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_all_items()
-
-        self.stop()
+        await self.boiler_plate(interaction)
 
     @discord.ui.button(label="B", style=discord.ButtonStyle.blurple)
     async def choiceB(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "b"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
+        await self.boiler_plate(interaction)
 
     @discord.ui.button(label="C", style=discord.ButtonStyle.blurple)
     async def choiceC(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "c"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
-    
+        await self.boiler_plate(interaction)
+
     @discord.ui.button(label="D", style=discord.ButtonStyle.blurple)
     async def choiceD(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "d"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
-    
+        await self.boiler_plate(interaction)
+
     @discord.ui.button(label="E", style=discord.ButtonStyle.blurple)
     async def choiceE(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "e"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
+        await self.boiler_plate(interaction)
+    
+    
+    @discord.ui.button(label="DM Solution", style=discord.ButtonStyle.danger)
+    async def choiceF(self, interaction: discord.Interaction, button: discord.ui.Button):
 
+        if interaction.user.id == self.author.id:
+            await interaction.response.send_message(f"You asked for the question. I cannot DM you the answer. {interaction.user.mention}")
+            return
+        user = interaction.user
+        try:
+            await user.send(f"The solution is {self.sol}")
+        except discord.errors.Forbidden:
+            await interaction.response.send_message("I am unable to send you a DM. Please check your privacy settings.")
+        else:
+            await interaction.response.send_message(f"DM sent to {user.mention}")
+        finally:
+            self.clicked = False
+            await interaction.response.defer()
+            self.stop()
+
+    @discord.ui.button(label="AoPS Link", style=discord.ButtonStyle.danger)
+    async def choiceG(self, interaction: discord.Interaction, button: discord.ui.Button):
+        url = f"https://artofproblemsolving.com/wiki/index.php?title={self.randomyear}_AMC_{self.amc10_contestid}_Problems/Problem_{self.amc_medium}"
+        if interaction.user.id == self.author.id:
+            await interaction.response.send_message(f"Please complete question first {interaction.user.mention}")
+            self.clicked = False
+        else:
+            await interaction.response.send_message(f"AoPS Link: {url}")
+            self.clicked = True
+            await self.disable_if_clicked()
+            self.stop()
+            
+            
 
 class AMC10(commands.Cog):
     def __init__(self, bot):
@@ -144,10 +163,10 @@ class AMC10(commands.Cog):
     @commands.command()
     async def amc10(self, ctx, difficulty):
         user_guild_id = ctx.guild.id
-        user_id = ctx.author.id
+        author = ctx.author.id
+        author = ctx.author
         
         status_color = {"easy": 0x3CB371, "medium": 0xFF8C00, "hard": 0xED1C24}
-
 
         if difficulty.lower() == "e" or difficulty.lower() == "easy":
             randomyear = str(random.randint(2002, 2019))
@@ -176,7 +195,7 @@ class AMC10(commands.Cog):
                     ))
             # essential_arguements= essential_arguements(sol=sol, randomyear=randomyear, amc10_contestid=amc10_contestid, amc_easy=amc_easy)
             
-            buttons= Choice(sol, randomyear, amc10_contestid, amc_easy, right_response_embed, wrong_response_embed)
+            buttons= Choice(sol, randomyear, amc10_contestid, amc_easy, right_response_embed, wrong_response_embed, author)
             print(sol)
             question = await ctx.send(embed=question_embed, view=buttons)
             buttons.message = question
@@ -196,8 +215,6 @@ class AMC10(commands.Cog):
                 url=f"https://raw.githubusercontent.com/yak-fumblepack/mathcontests/master/AMC/{randomyear}/{amc10_contestid}/{amc_medium}/statement.png"
             )
 
-
-
             sol = str(
                 (
                     requests.get(
@@ -213,7 +230,7 @@ class AMC10(commands.Cog):
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_medium})"
                     ))
             
-            buttons= Choice(sol, randomyear, amc10_contestid, amc_medium, right_response_embed, wrong_response_embed)
+            buttons= Choice(sol, randomyear, amc10_contestid, amc_medium, right_response_embed, wrong_response_embed, author)
             print(sol)
             question = await ctx.send(embed=question_embed, view=buttons)
             buttons.message = question
@@ -244,7 +261,7 @@ class AMC10(commands.Cog):
 
             right_response_embed = discord.Embed(description = ( f"Correct Answer. Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_hard})"))
             wrong_response_embed = discord.Embed(description = ( f"Wrong Answer. Correct was `{sol.upper()}`. How? Source of the problem is [here](https://artofproblemsolving.com/wiki/index.php?title={randomyear}_AMC_{amc10_contestid}_Problems/Problem_{amc_hard})"))
-            buttons= Choice(sol, randomyear, amc10_contestid, amc_hard, right_response_embed, wrong_response_embed)
+            buttons= Choice(sol, randomyear, amc10_contestid, amc_hard, right_response_embed, wrong_response_embed, author)
             print(sol)
             question = await ctx.send(embed=question_embed, view=buttons)
             buttons.message = question

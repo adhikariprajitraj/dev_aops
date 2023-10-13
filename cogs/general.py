@@ -18,54 +18,52 @@ class General(commands.Cog, name="general"):
     )
     async def help(self, context: Context) -> None:
         prefix = self.bot.config["prefix"]
-        embed = discord.Embed(
-            title="Help", description="List of available commands:", color=0x9C84EF)
-        embed.add_field(
-            name=f"{prefix}amc10 [easy/medium/hard]", value="```Gives you a random amc10 problem depending on the difficulty you choose.```", inline=False)
-        embed.add_field(name =f"{prefix}amc12 [easy/medium/hard]", value="```Gives you a random amc10 problem depending on the difficulty you choose.```", inline=False)
-        embed.add_field(name = f"{prefix}last5 [aime, usamo, usajmo, amc10, amc12]", value="```Gives you a random problem of last 5 years depending upon the flavour you choose.```", inline=False)
-        embed.add_field(name = f"{prefix}random/ {prefix}random", value="```Gives you a random problem.```", inline=False)
-        
-        embed.add_field(name = f"{prefix}botinfo", value="```Gives you some information about the bot.```", inline=False)
-        embed.add_field(name = f"{prefix}ping", value="```Gives you the latency of the bot.```", inline=False)
-        embed.add_field(name = f"{prefix}invite", value="```Gives you the invite link of the bot.```", inline=False)
-        embed.add_field(name = f"{prefix}source", value="```Gives you the source code of the bot.(This will be available soon once bot hits top.gg)```", inline=False)
-        embed.add_field(name = f"{prefix}serverinfo", value="```Gives you some information about the server.```", inline=False)
-        embed.add_field(name = f"{prefix}rps", value="```Play rock paper scissors with the bot.```", inline=False)
-        embed.add_field(name = f"{prefix}8ball", value="```Ask the bot a question and it will answer it.```", inline=False)
-        
-        await context.send(embed=embed)
-    @commands.hybrid_command(
-        name="botinfo",
-        description="Get some useful (or not) information about the bot.",
-    )
-    async def botinfo(self, context: Context) -> None:
+        embed = discord.Embed(title=":books: Help",
+                            description="List of available commands:",
+                            color=0x2471a3)
 
-        embed = discord.Embed(
-            description="Made by Nyom Nyom",
-            color=0x9C84EF
-        )
-        embed.set_author(
-            name="Bot Information"
-        )
         embed.add_field(
-            name="Owner:",
-            value="Nyom Nyom#8949",
-            inline=True
-        )
+        name=f":one: {prefix}amc10 easy/medium/hard",
+        value=
+        "```Gives you a random AMC 10 problem depending on the difficulty you choose.```",
+        inline=True)
+
         embed.add_field(
-            name="Python Version:",
-            value=f"{platform.python_version()}",
-            inline=True
-        )
+        name=f":headstone: {prefix}amc12 easy/medium/hard",
+        value=
+        " ```Gives you a random AMC 12 problem depending on the difficulty you choose.```",
+        inline=True)
+
         embed.add_field(
-            name="Prefix:",
-            value=f"/ (Slash Commands) or {self.bot.config['prefix']} for normal commands",
-            inline=False
-        )
-        embed.set_footer(
-            text=f"Requested by {context.author}"
-        )
+        name=f":hourglass: {prefix}last5 aime/usamo/usajmo/amc10/amc12",
+        value=
+        " ```Gives you a random problem from the last 5 years depending on the exam you choose.```",
+        inline=False)
+
+        embed.add_field(name=f":game_die:  {prefix}random / {prefix}rnd",
+                        value="```Gives you a random problem.```",
+                        inline=True)
+
+        embed.add_field(name=f":information_source: {prefix}botinfo",
+                        value=" ```Gives you some information about the bot.```",
+                        inline=True)
+
+        embed.add_field(name=f":love_letter: {prefix}invite",
+                        value=" ```Gives you the invite link of the bot.```",
+                        inline=True)
+
+        embed.add_field(name=f"{prefix}cmo",
+                        value="```Gives a random cmo problem```",
+                        inline=True)
+        embed.add_field(name=f"{prefix}aime",
+                        value="```Gives a random AIME problem```",
+                        inline=True)
+        embed.add_field(name="source",
+                        value="https://github.com/beebekisme/dev_aops",
+                        inline=False)
+
+        embed.set_footer(text=" Bot made with love by Nyom Nyom#8949")
+
         await context.send(embed=embed)
 
     @commands.hybrid_command(

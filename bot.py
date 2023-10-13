@@ -1,5 +1,3 @@
-
-
 import asyncio
 import json
 import os
@@ -7,7 +5,6 @@ import platform
 import random
 import sys
 
-import aiosqlite
 import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
@@ -18,6 +15,7 @@ if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.jso
     sys.exit("'config.json' not found! Please add it and try again.")
 else:
     with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
+        
         config = json.load(file)
 
 
@@ -27,13 +25,6 @@ intents.message_content = True
 
 bot = Bot(command_prefix=commands.when_mentioned_or(
     config["prefix"]), intents=intents, help_command=None)
-
-
-async def init_db():
-    async with aiosqlite.connect(f"{os.path.realpath(os.path.dirname(__file__))}/database/database.db") as db:
-        with open(f"{os.path.realpath(os.path.dirname(__file__))}/database/schema.sql") as file:
-            await db.executescript(file.read())
-        await db.commit()
 
 bot.config = config
 

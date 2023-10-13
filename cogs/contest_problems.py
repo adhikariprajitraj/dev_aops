@@ -13,87 +13,106 @@ aime_id = ["1", "2"]
 
 class Choice(discord.ui.View):
     value = None
-    clicked:bool = False
-    timeout=1000
-    
-    def __init__(self, sol, randomyear, amc10_contestid, amc_medium, right_response_embed, wrong_response_embed):
+    clicked: bool = False
+    timeout = 10000
+
+    def __init__(self, sol, randomyear, amc10_contestid, amc_medium, right_response_embed, wrong_response_embed,
+                 author):
         self.sol = sol
         self.randomyear = randomyear
         self.amc10_contestid = amc10_contestid
         self.amc_medium = amc_medium
-        self.right_response_embed=  right_response_embed
-        self.wrong_response_embed=  wrong_response_embed
+        self.right_response_embed = right_response_embed
+        self.wrong_response_embed = wrong_response_embed
+        self.author = author
         super().__init__()
 
     async def disable_all_items(self):
         for item in self.children:
+            
             item.disabled = True
-        
+
     async def disable_if_clicked(self):
         if self.clicked:
             await self.disable_all_items()
-        await self.message.edit(view=self)
         
+        await self.message.edit(view=self)
+
     async def on_timeout(self) -> None:
         # await self.message.channel.send("Timed out due to inactivity. You may want to donate some money to cover server costs.")
         await self.disable_all_items()
-    
+
+    async def boiler_plate(self, interaction: discord.Interaction):
+        if interaction.user.id == self.author.id:
+            if self.value == str(self.sol):
+                await interaction.response.send_message(embed=self.right_response_embed)
+            else:
+                await interaction.response.send_message(embed=self.wrong_response_embed)
+            self.clicked = True
+            await self.disable_all_items()
+        else:
+            await interaction.response.send_message(f"You are not the author of this message {interaction.user.mention}")
+            self.clicked = False
+        self.clicked = True
+        await self.disable_if_clicked()
+        self.stop()
 
     @discord.ui.button(label="A", style=discord.ButtonStyle.blurple)
     async def choiceA(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "a"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_all_items()
-
-        self.stop()
+        await self.boiler_plate(interaction)
 
     @discord.ui.button(label="B", style=discord.ButtonStyle.blurple)
     async def choiceB(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "b"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
+        await self.boiler_plate(interaction)
 
     @discord.ui.button(label="C", style=discord.ButtonStyle.blurple)
     async def choiceC(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "c"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
-    
+        await self.boiler_plate(interaction)
+
     @discord.ui.button(label="D", style=discord.ButtonStyle.blurple)
     async def choiceD(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "d"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
-        else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
-    
+        await self.boiler_plate(interaction)
+
     @discord.ui.button(label="E", style=discord.ButtonStyle.blurple)
     async def choiceE(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = "e"
-        if self.value == str(self.sol):
-            await interaction.response.send_message(embed=self.right_response_embed)
+        await self.boiler_plate(interaction)
+    
+    
+    @discord.ui.button(label="DM Solution", style=discord.ButtonStyle.danger)
+    async def choiceF(self, interaction: discord.Interaction, button: discord.ui.Button):
+
+        if interaction.user.id == self.author.id:
+            await interaction.response.send_message(f"You asked for the question. I cannot DM you the answer. {interaction.user.mention}")
+            return
+        user = interaction.user
+        try:
+            await user.send(f"The solution is {self.sol}")
+        except discord.errors.Forbidden:
+            await interaction.response.send_message("I am unable to send you a DM. Please check your privacy settings.")
         else:
-            await interaction.response.send_message(embed=self.wrong_response_embed)
-        self.clicked = True
-        await self.disable_if_clicked()
-        self.stop()
+            await interaction.response.send_message(f"DM sent to {user.mention}")
+        finally:
+            self.clicked = False
+            await interaction.response.defer()
+            self.stop()
+
+    @discord.ui.button(label="AoPS Link", style=discord.ButtonStyle.danger)
+    async def choiceG(self, interaction: discord.Interaction, button: discord.ui.Button):
+        url = f"https://artofproblemsolving.com/wiki/index.php?title={self.randomyear}_AMC_{self.amc10_contestid}_Problems/Problem_{self.amc_medium}"
+        if interaction.user.id == self.author.id:
+            await interaction.response.send_message(f"Please complete question first {interaction.user.mention}")
+            self.clicked = False
+        else:
+            await interaction.response.send_message(f"AoPS Link: {url}")
+            self.clicked = True
+            await self.disable_if_clicked()
+            self.stop()
+            
 
 class ContestProblems(commands.Cog):
     def __init__(self, bot):
@@ -107,7 +126,7 @@ class ContestProblems(commands.Cog):
     @commands.command(name="cmo", description="Displays a random CMO problem")
     async def cmo(self, ctx):
         user_guild_id = ctx.guild.id
-        user_id = ctx.author.id
+        author = ctx.author.id
 
         cmo_year = random.randint(1969, 1973)
         cmo_question = random.randint(1, 9)
@@ -126,7 +145,7 @@ class ContestProblems(commands.Cog):
     @commands.command(name="aime")
     async def aime(self, ctx):
         user_guild_id = ctx.guild.id
-        user_id = ctx.author.id
+        author = ctx.author.id
         
         aime_year = random.randint(1983, 2019)
         aime_version = random.randint(1, 2)
@@ -156,7 +175,7 @@ class ContestProblems(commands.Cog):
     @commands.command()
     async def fetch(self, ctx, *, args=None):
         user_guild_id = ctx.guild.id
-        user_id = ctx.author.id
+        author = ctx.author.id
         
         if args is not None:
             contest_data = args.upper().split()
@@ -189,7 +208,7 @@ class ContestProblems(commands.Cog):
     @commands.command(aliases=["l5", "last5", "lfive"])
     async def lastfive(self, ctx, args):
         user_guild_id = ctx.guild.id
-        user_id = ctx.author.id
+        author = ctx.author.id
         
 
         def parse_args(args):
@@ -214,7 +233,7 @@ class ContestProblems(commands.Cog):
             last_5 = str(random.randint(10, 15))
 
             question_embed = discord.Embed(
-                title=f"{aime_year} AIME {'I'*random_aime_id} Problem {last_5}",
+                title=f"{aime_year} AIME {random_aime_id} Problem {last_5}",
                 description=f"<@{ctx.author.id}> Bot is still in development, solution will be available soon..",
                 color=0xCF9FFF,
             ).set_image(
@@ -248,6 +267,10 @@ class ContestProblems(commands.Cog):
 
             await ctx.channel.send(embed=question_embed)
         elif parsed_arg == "amc10":
+            user_guild_id = ctx.guild.id
+            author = ctx.author.id
+            author = ctx.author
+
             random_year = str(random.randint(2002, 2019))
             last_5 = str(random.randint(20, 25))
             amc_id = str(random.choice(amc10_id))
@@ -274,7 +297,7 @@ class ContestProblems(commands.Cog):
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})."
                     ))
 
-            buttons= Choice(sol, random_year, amc_id, last_5, right_response_embed, wrong_response_embed)
+            buttons= Choice(sol, random_year, amc_id, last_5, right_response_embed, wrong_response_embed, author)
             print(sol)
             question = await ctx.send(embed=question_embed, view=buttons)
             buttons.message = question
@@ -282,6 +305,10 @@ class ContestProblems(commands.Cog):
             print(f"value of button is {buttons.value}")
 
         elif parsed_arg == "amc12":
+            user_guild_id = ctx.guild.id
+            author = ctx.author.id
+            author = ctx.author
+
             random_year = str(random.randint(2002, 2019))
             last_5 = str(random.randint(20, 25))
             amc_id = str(random.choice(amc12_id))
@@ -310,7 +337,7 @@ class ContestProblems(commands.Cog):
                     f"Wrong Answer. Correct was `{sol.upper()}`. How? Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{amc_id}_Problems/Problem_{last_5})."
                     ))
 
-            buttons= Choice(sol, random_year, amc_id, last_5, right_response_embed, wrong_response_embed)
+            buttons= Choice(sol, random_year, amc_id, last_5, right_response_embed, wrong_response_embed, author)
             print(sol)
             question = await ctx.send(embed=question_embed, view=buttons)
             buttons.message = question
@@ -321,7 +348,8 @@ class ContestProblems(commands.Cog):
     @commands.command(aliases=["rnd"])
     async def random(self, ctx):
         user_guild_id = ctx.guild.id
-        user_id = ctx.author.id
+        author = ctx.author.id
+        author = ctx.author
         
         tried = []
         random_contest = str(random.choice(amc_id))
@@ -349,9 +377,9 @@ class ContestProblems(commands.Cog):
                     f"Correct Answer `{sol.upper()}`. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{random_contest}_Problems/Problem_{random_problem})"))
 
         wrong_response_embed = discord.Embed(description = (
-                    f"Wrong Answer. Correct was `{sol.upper()}`. How? Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_contest}_AMC_{amc_id}_Problems/Problem_{random_problem})."))
+                    f"Wrong Answer `{sol.upper()}`. Solution is [here](https://artofproblemsolving.com/wiki/index.php?title={random_year}_AMC_{random_contest}_Problems/Problem_{random_problem})"))
 
-        buttons= Choice(sol, random_year, amc_id, random_problem, right_response_embed, wrong_response_embed)
+        buttons= Choice(sol, random_year, amc_id, random_problem, right_response_embed, wrong_response_embed, author)
         print(sol)
         question = await ctx.send(embed=question_embed, view=buttons)
         buttons.message = question
