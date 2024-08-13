@@ -145,4 +145,4 @@ async def load_cogs() -> None:
 
 
 asyncio.run(load_cogs())
-bot.run(config["token"])
+bot.run(os.getenv("API_TOKEN"))

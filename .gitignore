@@ -1,0 +1,7 @@
+.idea
+.env
+config.json
+.pyc
+__pycache__
+cogs/__pycache__
+exceptions/__pycache__
